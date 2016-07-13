@@ -23,21 +23,30 @@
 
     EncoderOutput frag_encode(v2f_img i)
     {
+        float sw = _ScreenParams.x;     // Screen width
+        float pw = _ScreenParams.z - 1; // Pixel wdith
+
         // RGB to YCbCr convertion matrix
         const half3 kY  = half3( 0.299   ,  0.587   ,  0.114   );
         const half3 kCB = half3(-0.168736, -0.331264,  0.5     );
         const half3 kCR = half3( 0.5     , -0.418688, -0.081312);
 
         // 0: even column, 1: odd column
-        half odd = frac(i.uv.x * _ScreenParams.x * 0.5) > 0.5;
+        half odd = frac(i.uv.x * sw * 0.5) > 0.5;
 
-        // Sample the source.
-        half3 rgb = tex2D(_MainTex, i.uv).rgb;
+        // Calculate UV for chroma componetns.
+        // It's between the even and odd columns.
+        float2 uv_c = i.uv.xy;
+        uv_c.x = (floor(uv_c.x * sw * 0.5) * 2 + 1) * pw;
+
+        // Sample the source texture.
+        half3 rgb_y = tex2D(_MainTex, i.uv).rgb;
+        half3 rgb_c = tex2D(_MainTex, uv_c).rgb;
 
         // Convertion and subsampling
         EncoderOutput o;
-        o.luma = dot(kY, rgb);
-        o.chroma = dot(lerp(kCB, kCR, odd), rgb) + 0.5;
+        o.luma = dot(kY, rgb_y);
+        o.chroma = dot(lerp(kCB, kCR, odd), rgb_c) + 0.5;
         return o;
     }
 
