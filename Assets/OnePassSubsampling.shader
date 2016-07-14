@@ -43,6 +43,11 @@
         half3 rgb_y = tex2D(_MainTex, i.uv).rgb;
         half3 rgb_c = tex2D(_MainTex, uv_c).rgb;
 
+        #if !UNITY_COLORSPACE_GAMMA
+        rgb_y = LinearToGammaSpace(rgb_y);
+        rgb_c = LinearToGammaSpace(rgb_c);
+        #endif
+
         // Convertion and subsampling
         EncoderOutput o;
         o.luma = dot(kY, rgb_y);
@@ -69,11 +74,17 @@
         half cr = tex2D(_ChromaTex, uv_cr).r - 0.5;
 
         // Convert to RGB.
-        half r = y                + 1.402   * cr;
-        half g = y - 0.34414 * cb - 0.71414 * cr;
-        half b = y + 1.772   * cb;
+        half3 rgb = half3(
+            y                + 1.402   * cr,
+            y - 0.34414 * cb - 0.71414 * cr,
+            y + 1.772   * cb
+        );
 
-        return half4(r, g, b, 1);
+        #if !UNITY_COLORSPACE_GAMMA
+        rgb = GammaToLinearSpace(rgb);
+        #endif
+
+        return half4(rgb, 1);
     }
 
     ENDCG
