@@ -95,6 +95,7 @@
         Pass
         {
             CGPROGRAM
+            #pragma multi_compile _ UNITY_COLORSPACE_GAMMA
             #pragma vertex vert_img
             #pragma fragment frag_encode
             #pragma target 3.0
@@ -103,6 +104,7 @@
         Pass
         {
             CGPROGRAM
+            #pragma multi_compile _ UNITY_COLORSPACE_GAMMA
             #pragma vertex vert_img
             #pragma fragment frag_decode
             #pragma target 3.0
